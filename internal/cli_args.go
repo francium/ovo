@@ -77,7 +77,8 @@ func DisplayHelp() {
 
 Runs the specified command every time a file system event occurs on or within
 the specified path. If the path is not specified, then the default .watchfile
-is used.
+is used. By default a SIGINT is sent to the command to stop it's execution when
+a new file system event occurs.
 
 Options must be specified before the command.
 
@@ -85,6 +86,10 @@ Flags:
   -h, --help     Display help
   -v, --verbose  Verbose logging
   -c, --clear    Clear screen every time
+      --now      Invoke command immediately on start
+  --sigint       send SIGINT signal to command (default)
+  --sigkill      Send SIGKILL signal to command
+  --sigterm      Send SIGTERM signal to command
 `,
 		argv0,
 	)
