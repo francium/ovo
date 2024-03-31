@@ -8,6 +8,19 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestParseArgsNoOptions(t *testing.T) {
+	os.Args = []string{"ovo"}
+	args := ParseArgs()
+	assert.Equal(t, args.Arg0, "ovo")
+	assert.Equal(t, args.Help, true)
+	assert.Equal(t, args.Verbose, false)
+	assert.Equal(t, args.ClearScreen, false)
+	assert.Equal(t, args.Signal, os.Interrupt)
+	assert.Equal(t, args.StartNow, false)
+	assert.Equal(t, args.WatchPath, "")
+	assert.Equal(t, args.Cmd, "")
+}
+
 func TestParseArgsHelp(t *testing.T) {
 	os.Args = []string{"ovo", "-h"}
 	args := ParseArgs()
