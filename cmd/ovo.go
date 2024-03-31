@@ -50,7 +50,7 @@ func main() {
 
 	i := 0
 
-	go handleFSEvent(watcher, func(path string) {
+	go handleFSEvent(watcher, args.StartNow, func() {
 		i++
 		log_prefix := fmt.Sprintf("(%d) ", i)
 
@@ -156,7 +156,11 @@ func main() {
 	<-make(chan struct{})
 }
 
-func handleFSEvent(watcher *fsnotify.Watcher, cb func(path string)) {
+func handleFSEvent(watcher *fsnotify.Watcher, start_now bool, cb func()) {
+	if start_now {
+		go cb()
+	}
+
 	for {
 		select {
 		case event, ok := <-watcher.Events:
@@ -165,7 +169,7 @@ func handleFSEvent(watcher *fsnotify.Watcher, cb func(path string)) {
 				return
 			}
 			log.Infof("path=%s, op=%s", event.Name, event.Op)
-			go cb(event.Name)
+			go cb()
 		case err, ok := <-watcher.Errors:
 			if !ok {
 				return

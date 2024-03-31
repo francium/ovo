@@ -88,14 +88,21 @@ func TestSigTerm(t *testing.T) {
 	assert.Equal(t, args.Signal, syscall.SIGTERM)
 }
 
+func TestNow(t *testing.T) {
+	os.Args = []string{"ovo", "--now", "--", "echo hi"}
+	args := ParseArgs()
+	assert.Equal(t, args.StartNow, true)
+}
+
 func TestParseArgsAllOptions(t *testing.T) {
-	os.Args = []string{"ovo", "-h", "--sigkill", "-v", "-c", "myfile.txt", "echo hi"}
+	os.Args = []string{"ovo", "-h", "--now", "--sigkill", "-v", "-c", "myfile.txt", "echo hi"}
 	args := ParseArgs()
 	assert.Equal(t, args.Arg0, "ovo")
 	assert.Equal(t, args.Help, true)
 	assert.Equal(t, args.Verbose, true)
 	assert.Equal(t, args.ClearScreen, true)
 	assert.Equal(t, args.Signal, os.Kill)
+	assert.Equal(t, args.StartNow, true)
 	assert.Equal(t, args.WatchPath, "myfile.txt")
 	assert.Equal(t, args.Cmd, "echo hi")
 }

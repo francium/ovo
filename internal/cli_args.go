@@ -15,6 +15,7 @@ type CliArgs struct {
 	Help        bool
 	Verbose     bool
 	Signal      os.Signal
+	StartNow    bool
 	ClearScreen bool
 	Cmd         string
 	WatchPath   string
@@ -33,6 +34,8 @@ loop:
 			args.Help = true
 		case "-v", "--verbose":
 			args.Verbose = true
+		case "--now":
+			args.StartNow = true
 		case "--sigkill":
 			args.Signal = os.Kill
 		case "--sigint":
