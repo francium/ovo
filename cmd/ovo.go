@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"sync"
 
 	"github.com/francium/ovo/internal"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/fsnotify/fsnotify"
 	"github.com/fatih/color"
+	"github.com/fsnotify/fsnotify"
 )
 
 const defaultWatchFile = ".watchfile"
@@ -45,6 +46,7 @@ func main() {
 	}
 
 	cancel := make(chan struct{})
+	runner_lock := sync.Mutex{}
 
 	i := 0
 
@@ -59,6 +61,11 @@ func main() {
 		default:
 		}
 
+		log.Info("Execution routine waiting for runner lock ", j)
+		runner_lock.Lock()
+		log.Info("Execution routine acquired runner lock ", j)
+
+		log.Info("Execution routine invoking command ", j)
 		cmd := exec.Command(
 			"bash", "-c", args.Cmd,
 		)
@@ -123,6 +130,9 @@ func main() {
 		if cmd.ProcessState != nil && !cmd.ProcessState.Exited() {
 			log.Fatal("Process did not exit")
 		}
+
+		log.Info("Execution routine releasing lock ", j)
+		runner_lock.Unlock()
 
 		log.Info("Execution routine end ", j)
 	})
