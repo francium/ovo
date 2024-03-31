@@ -52,20 +52,20 @@ func main() {
 
 	go handleFSEvent(watcher, func(path string) {
 		i++
-		j := i
+		log_prefix := fmt.Sprintf("(%d) ", i)
 
-		log.Info("Execution routine start ", j)
+		log.Info(log_prefix, "Execution routine start")
 
 		select {
 		case cancel <- struct{}{}:
 		default:
 		}
 
-		log.Info("Execution routine waiting for runner lock ", j)
+		log.Info(log_prefix, "Execution routine waiting for runner lock ")
 		runner_lock.Lock()
-		log.Info("Execution routine acquired runner lock ", j)
+		log.Info(log_prefix, "Execution routine acquired runner lock ")
 
-		log.Info("Execution routine invoking command ", j)
+		log.Info(log_prefix, "Execution routine invoking command ")
 		cmd := exec.Command(
 			"bash", "-c", args.Cmd,
 		)
@@ -77,25 +77,25 @@ func main() {
 		killing := false
 
 		go func() {
-			log.Info("Cancel routine start ", j)
+			log.Info(log_prefix, "Cancel routine start ")
 
 			<-cancel
 
-			log.Info("Cancel routine received cancel sign")
+			log.Info(log_prefix, "Cancel routine received cancel sign")
 
 			if cmd != nil {
-				log.Info("Cancel routine killing cmd")
+				log.Info(log_prefix, "Cancel routine killing cmd")
 				killing = true
 				cmd.Process.Signal(args.Signal)
 			} else {
-				log.Info("cmd is nil")
+				log.Warn(log_prefix, "Cmd is nil")
 			}
 
-			log.Info("Cancel routine end ", j)
+			log.Info(log_prefix, "Cancel routine end ")
 		}()
 
 		go func() {
-			log.Info("Runner routine start ", j)
+			log.Info(log_prefix, "Runner routine start ")
 
 			if args.ClearScreen {
 				fmt.Print(clearScreenEscapeSequence)
@@ -106,7 +106,7 @@ func main() {
 
 			err := cmd.Run()
 			if err != nil && !killing {
-				log.Error("Failed to run command: ", err)
+				log.Error(log_prefix, "Failed to run command: ", err)
 			}
 
 			select {
@@ -114,7 +114,7 @@ func main() {
 			default:
 			}
 
-			log.Info("Runner routine end ", j)
+			log.Info(log_prefix, "Runner routine end ")
 		}()
 
 		select {
@@ -128,13 +128,13 @@ func main() {
 		}
 
 		if cmd.ProcessState != nil && !cmd.ProcessState.Exited() {
-			log.Fatal("Process did not exit")
+			log.Fatal(log_prefix, "Process did not exit")
 		}
 
-		log.Info("Execution routine releasing lock ", j)
+		log.Info(log_prefix, "Execution routine releasing lock ")
 		runner_lock.Unlock()
 
-		log.Info("Execution routine end ", j)
+		log.Info(log_prefix, "Execution routine end ")
 	})
 
 	// Block
