@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"syscall"
 )
 
 const skipWatchPathMarker = "--"
@@ -13,6 +14,7 @@ type CliArgs struct {
 	Arg0        string
 	Help        bool
 	Verbose     bool
+	Signal      os.Signal
 	ClearScreen bool
 	Cmd         string
 	WatchPath   string
@@ -31,6 +33,12 @@ loop:
 			args.Help = true
 		case "-v", "--verbose":
 			args.Verbose = true
+		case "--sigkill":
+			args.Signal = os.Kill
+		case "--sigint":
+			args.Signal = os.Interrupt
+		case "--sigterm":
+			args.Signal = syscall.SIGTERM
 		case "-c", "--clear":
 			args.ClearScreen = true
 		default:
@@ -45,6 +53,10 @@ loop:
 
 	if args.Cmd == "" {
 		args.Help = true
+	}
+
+	if args.Signal == nil {
+		args.Signal = os.Interrupt
 	}
 
 	if args.WatchPath == skipWatchPathMarker {

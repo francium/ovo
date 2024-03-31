@@ -79,7 +79,7 @@ func main() {
 			if cmd != nil {
 				log.Info("Cancel routine killing cmd")
 				killing = true
-				cmd.Process.Signal(os.Kill)
+				cmd.Process.Signal(args.Signal)
 			} else {
 				log.Info("cmd is nil")
 			}
