@@ -65,7 +65,6 @@ func main() {
 		runner_lock.Lock()
 		log.Info(log_prefix, "Execution routine acquired runner lock ")
 
-		log.Info(log_prefix, "Execution routine invoking command ")
 		cmd := exec.Command(
 			"bash", "-c", args.Cmd,
 		)
@@ -104,6 +103,7 @@ func main() {
 			bold := color.New(color.Bold).SprintFunc()
 			fmt.Println(bold("> ", args.Cmd))
 
+			log.Info(log_prefix, "Runner routine invoking command ")
 			err := cmd.Run()
 			if err != nil && !killing {
 				log.Error(log_prefix, "Failed to run command: ", err)
@@ -117,14 +117,29 @@ func main() {
 			log.Info(log_prefix, "Runner routine end ")
 		}()
 
+		// It's possible this logic below isn't 100% bulletproof. Especially
+		// the way the cancel is triggered in the go routine below and the
+		// done/cancel block is below that.
+
+		// Here we want to first block until one of done or cancel send a
+		// message
 		select {
 		case <-done:
 		case <-cancel:
 		}
 
+		// Setup an async task to send a message to trigger the cancellation
+		go func() {
+			select {
+			case cancel <- struct{}{}:
+			default:
+			}
+		}()
+
+		// Wait until until the other channel sends a message.
 		select {
-		case cancel <- struct{}{}:
-		default:
+		case <-done:
+		case <-cancel:
 		}
 
 		if cmd.ProcessState != nil && !cmd.ProcessState.Exited() {
