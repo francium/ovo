@@ -16,6 +16,7 @@ type CliArgs struct {
 	Verbose     bool
 	Signal      os.Signal
 	StartNow    bool
+	ShowTime    bool
 	ClearScreen bool
 	Cmd         string
 	WatchPath   string
@@ -36,6 +37,8 @@ loop:
 			args.Verbose = true
 		case "--now":
 			args.StartNow = true
+		case "--time":
+			args.ShowTime = true
 		case "--sigkill":
 			args.Signal = os.Kill
 		case "--sigint":
@@ -86,6 +89,7 @@ Flags:
   -h, --help     Display help
   -v, --verbose  Verbose logging
   -c, --clear    Clear screen every time
+  --time         Display timestamp when command is invoked
   --now          Invoke command immediately on start
   --sigint       send SIGINT signal to command (default)
   --sigkill      Send SIGKILL signal to command

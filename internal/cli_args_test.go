@@ -15,6 +15,7 @@ func TestParseArgsNoOptions(t *testing.T) {
 	assert.Equal(t, args.Help, true)
 	assert.Equal(t, args.Verbose, false)
 	assert.Equal(t, args.ClearScreen, false)
+	assert.Equal(t, args.ShowTime, false)
 	assert.Equal(t, args.Signal, os.Interrupt)
 	assert.Equal(t, args.StartNow, false)
 	assert.Equal(t, args.WatchPath, "")
@@ -105,6 +106,12 @@ func TestNow(t *testing.T) {
 	os.Args = []string{"ovo", "--now", "--", "echo hi"}
 	args := ParseArgs()
 	assert.Equal(t, args.StartNow, true)
+}
+
+func TestTime(t *testing.T) {
+	os.Args = []string{"ovo", "--time", "--", "echo hi"}
+	args := ParseArgs()
+	assert.Equal(t, args.ShowTime, true)
 }
 
 func TestParseArgsAllOptions(t *testing.T) {

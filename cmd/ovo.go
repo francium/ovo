@@ -102,8 +102,12 @@ func main() {
 			}
 
 			bold := color.New(color.Bold).SprintFunc()
-			time_now := time.Now().Format("00:00:00.000")
-			fmt.Printf(bold("[%s] > %s\n"), time_now, args.Cmd)
+			if args.ShowTime {
+				time := time.Now().Format(time.TimeOnly)
+				fmt.Printf(bold("[%s] > %s\n"), time, args.Cmd)
+			} else {
+				fmt.Println(bold("> ", args.Cmd))
+			}
 
 			log.Info(log_prefix, "Runner routine invoking command ")
 			err := cmd.Run()
