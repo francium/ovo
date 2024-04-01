@@ -53,18 +53,18 @@ func main() {
 
 	go handleFSEvent(watcher, args.StartNow, func() {
 		i++
-		log_prefix := fmt.Sprintf("(%d) ", i)
+		log_prefix := fmt.Sprintf("(%d)", i)
 
-		log.Info(log_prefix, "Execution routine start")
+		log.Info(log_prefix, " Execution routine start")
 
 		select {
 		case cancel <- struct{}{}:
 		default:
 		}
 
-		log.Info(log_prefix, "Execution routine waiting for runner lock ")
+		log.Info(log_prefix, " Execution routine waiting for runner lock")
 		runner_lock.Lock()
-		log.Info(log_prefix, "Execution routine acquired runner lock ")
+		log.Info(log_prefix, " Execution routine acquired runner lock")
 
 		cmd := exec.Command(
 			"bash", "-c", args.Cmd,
@@ -77,25 +77,25 @@ func main() {
 		killing := false
 
 		go func() {
-			log.Info(log_prefix, "Cancel routine start ")
+			log.Info(log_prefix, " Cancel routine start")
 
 			<-cancel
 
-			log.Info(log_prefix, "Cancel routine received cancel sign")
+			log.Info(log_prefix, " Cancel routine received cancel sign")
 
 			if cmd != nil {
-				log.Info(log_prefix, "Cancel routine killing cmd")
+				log.Info(log_prefix, " Cancel routine killing cmd")
 				killing = true
 				cmd.Process.Signal(args.Signal)
 			} else {
-				log.Warn(log_prefix, "Cmd is nil")
+				log.Warn(log_prefix, " Cmd is nil")
 			}
 
-			log.Info(log_prefix, "Cancel routine end ")
+			log.Info(log_prefix, " Cancel routine end ")
 		}()
 
 		go func() {
-			log.Info(log_prefix, "Runner routine start ")
+			log.Info(log_prefix, " Runner routine start ")
 
 			if args.ClearScreen {
 				fmt.Print(clearScreenEscapeSequence)
@@ -109,10 +109,10 @@ func main() {
 				fmt.Println(bold("> ", args.Cmd))
 			}
 
-			log.Info(log_prefix, "Runner routine invoking command ")
+			log.Info(log_prefix, " Runner routine invoking command ")
 			err := cmd.Run()
 			if err != nil && !killing {
-				log.Error(log_prefix, "Failed to run command: ", err)
+				log.Error(log_prefix, " Failed to run command: ", err)
 			}
 
 			select {
@@ -120,7 +120,7 @@ func main() {
 			default:
 			}
 
-			log.Info(log_prefix, "Runner routine end ")
+			log.Info(log_prefix, " Runner routine end ")
 		}()
 
 		// It's possible this logic below isn't 100% bulletproof. Especially
@@ -149,18 +149,20 @@ func main() {
 		}
 
 		if cmd.ProcessState != nil && !cmd.ProcessState.Exited() {
-			log.Warningf(
-				"%s Process did not exit, current state=%s, exit status=%d",
-				log_prefix,
-				cmd.ProcessState,
-				cmd.ProcessState.ExitCode(),
+			log.Warning(
+				fmt.Sprintf(
+					"%s Process did not exit, current state=%s, exit status=%d",
+					log_prefix,
+					cmd.ProcessState,
+					cmd.ProcessState.ExitCode(),
+				),
 			)
 		}
 
-		log.Info(log_prefix, "Execution routine releasing lock ")
+		log.Info(log_prefix, " Execution routine releasing lock ")
 		runner_lock.Unlock()
 
-		log.Info(log_prefix, "Execution routine end ")
+		log.Info(log_prefix, " Execution routine end ")
 	})
 
 	// Block
