@@ -86,7 +86,7 @@ Flags:
   -h, --help     Display help
   -v, --verbose  Verbose logging
   -c, --clear    Clear screen every time
-      --now      Invoke command immediately on start
+  --now          Invoke command immediately on start
   --sigint       send SIGINT signal to command (default)
   --sigkill      Send SIGKILL signal to command
   --sigterm      Send SIGTERM signal to command
