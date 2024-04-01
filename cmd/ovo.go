@@ -143,7 +143,12 @@ func main() {
 		}
 
 		if cmd.ProcessState != nil && !cmd.ProcessState.Exited() {
-			log.Fatal(log_prefix, "Process did not exit")
+			log.Warningf(
+				"%s Process did not exit, current state=%s, exit status=%d",
+				log_prefix,
+				cmd.ProcessState,
+				cmd.ProcessState.ExitCode(),
+			)
 		}
 
 		log.Info(log_prefix, "Execution routine releasing lock ")
